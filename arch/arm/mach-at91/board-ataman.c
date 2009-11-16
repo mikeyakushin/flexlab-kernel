@@ -166,7 +166,7 @@ static struct mtd_partition ataman_part[] = {
 
 static void ataman_flash_set_vpp(struct map_info* mi,int i)
 {
-	printk("Ataman flash set vpp i=%i\n",i);
+	//printk("Ataman flash set vpp i=%i\n",i);
 }
 static struct physmap_flash_data ataman_flash_data = {
 	.parts = ataman_part,
@@ -200,6 +200,39 @@ static struct gpio_led atamand_leds[] = {
 	}
 };
 */
+static struct gpio_led ataman_leds[] = {
+	{
+		.name			= "led8",
+		.gpio			= AT91_PIN_PB27,
+		.active_low		= 0,
+		.default_trigger	= "heartbeat",
+	},
+	{
+		.name			= "led9",
+		.gpio			= AT91_PIN_PB25,
+		.active_low		= 0,
+		.default_trigger	= "heartbeat",
+	},
+	{
+		.name			= "led10",
+		.gpio			= AT91_PIN_PB14,
+		.active_low		= 0,
+		.default_trigger	= "heartbeat",
+	},
+		{
+		.name			= "led11",
+		.gpio			= AT91_PIN_PB22,
+		.active_low		= 0,
+		.default_trigger	= "heartbeat",
+	},
+	{
+		.name			= "led12",
+		.gpio			= AT91_PIN_PA19,
+		.active_low		= 0,
+		.default_trigger	= "heartbeat",
+	}
+
+};
 static void __init ataman_board_init(void)
 {
 	/* Serial */
@@ -229,7 +262,7 @@ static void __init ataman_board_init(void)
 	/* NOR Flash */
 	platform_device_register(&ataman_flash);
 	/* LEDs */
-	//at91_gpio_leds(ataman_leds, ARRAY_SIZE(ataman_leds));
+	at91_gpio_leds(ataman_leds, ARRAY_SIZE(ataman_leds));
 	/* VGA */
 //	ataman_add_device_video();
 }
