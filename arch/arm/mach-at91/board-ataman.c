@@ -21,18 +21,19 @@
 #include <linux/platform_device.h>
 #include <linux/spi/spi.h>
 #include <linux/mtd/physmap.h>
-
+#include <linux/mtd/mtd.h>
+#include <linux/mtd/partitions.h>
 #include <asm/setup.h>
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
 #include <asm/mach/irq.h>
-
+#include <linux/mtd/physmap.h>
 #include <mach/hardware.h>
 #include <mach/board.h>
 #include <mach/gpio.h>
 #include <mach/at91rm9200_mc.h>
-
+#include <asm/mach/flash.h>
 #include "generic.h"
 
 
@@ -65,11 +66,11 @@ static void __init ataman_init_irq(void)
 	.phy_irq_pin	= AT91_PIN_PC4,
 	.is_rmii	= 1,
 };
-
+*/
 static struct at91_usbh_data __initdata dk_usbh_data = {
-	.ports		= 2,
+	.ports		= 1,
 };
-
+/*
 static struct at91_udc_data __initdata dk_udc_data = {
 	.vbus_pin	= AT91_PIN_PD4,
 	.pullup_pin	= AT91_PIN_PD5,
@@ -116,14 +117,8 @@ static struct spi_board_info ataman_spi_devices[] = {
 
 static struct i2c_board_info __initdata ataman_i2c_devices[] = {
 	{
-		I2C_BOARD_INFO("ics1523", 0x26),
+		I2C_BOARD_INFO("rtc-ds1672", 0x68),
 	},
-	{
-		I2C_BOARD_INFO("x9429", 0x28),
-	},
-	{
-		I2C_BOARD_INFO("24c1024", 0x50),
-	}
 };
 
 static struct mtd_partition __initdata ataman_nand_partition[] = {
@@ -149,16 +144,40 @@ static struct atmel_nand_data __initdata ataman_nand_data = {
 	.partition_info	= nand_partitions,
 };
 
-#define DK_FLASH_BASE	AT91_CHIPSELECT_0
-#define DK_FLASH_SIZE	SZ_2M
+#define ATAMAN_FLASH_BASE	AT91_CHIPSELECT_0
+#define ATAMAN_FLASH_SIZE	SZ_8M
+static struct mtd_partition ataman_part[] = {
+	{	.name = "uboot",
+	.size = 0x30000,//196KiB
+	.offset = 0,
+	},
+	{
+		.name = "uImage",
+		.size = 2*1024*1024, //2MiB
+		.offset = MTDPART_OFS_APPEND,
+	},
+	{
+		.name = "root",
+		.size = MTDPART_SIZ_FULL ,
+		.offset = MTDPART_OFS_APPEND,
+	},
 
+};
+
+static void ataman_flash_set_vpp(struct map_info* mi,int i)
+{
+	printk("Ataman flash set vpp i=%i\n",i);
+}
 static struct physmap_flash_data ataman_flash_data = {
-	.width		= 2,
+	.parts = ataman_part,
+	.width = 2, 
+	.nr_parts = 3,
+	.set_vpp = ataman_flash_set_vpp,
 };
 
 static struct resource ataman_flash_resource = {
-	.start		= DK_FLASH_BASE,
-	.end		= DK_FLASH_BASE + DK_FLASH_SIZE - 1,
+	.start		= ATAMAN_FLASH_BASE,
+	.end		= ATAMAN_FLASH_BASE + ATAMAN_FLASH_SIZE - 1,
 	.flags		= IORESOURCE_MEM,
 };
 
@@ -188,14 +207,14 @@ static void __init ataman_board_init(void)
 	/* Ethernet */
 	//at91_add_device_eth(&dk_eth_data);
 	/* USB Host */
-	//at91_add_device_usbh(&dk_usbh_data);
+	at91_add_device_usbh(&dk_usbh_data);
 	/* USB Device */
 	//at91_add_device_udc(&dk_udc_data);
 	//at91_set_multi_drive(ataman_udc_data.pullup_pin, 1);	/* pullup_pin is connected to reset */
 	/* Compact Flash */
-//	at91_add_device_cf(&ataman_cf_data);
+	at91_add_device_cf(&ataman_cf_data);
 	/* I2C */
-//	at91_add_device_i2c(ataman_i2c_devices, ARRAY_SIZE(ataman_i2c_devices));
+	at91_add_device_i2c(ataman_i2c_devices, ARRAY_SIZE(ataman_i2c_devices));
 	/* SPI */
 //	at91_add_device_spi(ataman_spi_devices, ARRAY_SIZE(ataman_spi_devices));
 	/* DataFlash card */
@@ -208,7 +227,7 @@ static void __init ataman_board_init(void)
 	/* NAND */
 //	at91_add_device_nand(&ataman_nand_data);
 	/* NOR Flash */
-//	platform_device_register(&ataman_flash);
+	platform_device_register(&ataman_flash);
 	/* LEDs */
 	//at91_gpio_leds(ataman_leds, ARRAY_SIZE(ataman_leds));
 	/* VGA */
