@@ -42,17 +42,15 @@ static void __init ataman_map_io(void)
 	/* Initialize processor: 18.432 MHz crystal */
 	at91rm9200_initialize(18432000, AT91RM9200_BGA);
 
-	/* Setup the LEDs */
-	//at91_init_leds(AT91_PIN_PB2, AT91_PIN_PB2);
-
 	/* DBGU on ttyS0. (Rx & Tx only) */
 	at91_register_uart(0, 0, 0);
 
 	/* USART1 on ttyS1. (Rx, Tx, CTS, RTS, DTR, DSR, DCD, RI) */
-/*	at91_register_uart(AT91RM9200_ID_US1, 1, ATMEL_UART_CTS | ATMEL_UART_RTS
-			   | ATMEL_UART_DTR | ATMEL_UART_DSR | ATMEL_UART_DCD
-			   | ATMEL_UART_RI);
-*/
+	at91_register_uart(AT91RM9200_ID_US0, 1, ATMEL_UART_CTS | ATMEL_UART_RTS);
+	at91_register_uart(AT91RM9200_ID_US1, 2, ATMEL_UART_CTS | ATMEL_UART_RTS);
+	at91_register_uart(AT91RM9200_ID_US2, 3, 0);
+	at91_register_uart(AT91RM9200_ID_US3, 4, ATMEL_UART_CTS | ATMEL_UART_RTS);
+
 	/* set serial console to ttyS0 (ie, DBGU) */
 	at91_set_serial_console(0);
 }
@@ -62,20 +60,19 @@ static void __init ataman_init_irq(void)
 	at91rm9200_init_interrupts(NULL);
 }
 
-/*static struct at91_eth_data __initdata dk_eth_data = {
-	.phy_irq_pin	= AT91_PIN_PC4,
+static struct at91_eth_data __initdata ataman_eth_data = {
+	.phy_irq_pin	= 0,
 	.is_rmii	= 1,
 };
-*/
-static struct at91_usbh_data __initdata dk_usbh_data = {
+static struct at91_usbh_data __initdata ataman_usbh_data = {
 	.ports		= 1,
 };
-/*
-static struct at91_udc_data __initdata dk_udc_data = {
-	.vbus_pin	= AT91_PIN_PD4,
-	.pullup_pin	= AT91_PIN_PD5,
+
+static struct at91_udc_data __initdata ataman_udc_data = {
+	.vbus_pin	= AT91_PIN_PB28,
+	.pullup_pin	= AT91_PIN_PB29,
 };
-*/
+
 static struct at91_cf_data __initdata ataman_cf_data = {
 	.det_pin	= AT91_PIN_PC14,
 	.rst_pin	= AT91_PIN_PC15,
@@ -121,35 +118,13 @@ static struct i2c_board_info __initdata ataman_i2c_devices[] = {
 	},
 };
 
-static struct mtd_partition __initdata ataman_nand_partition[] = {
-	{
-		.name	= "NAND Partition 1",
-		.offset	= 0,
-		.size	= MTDPART_SIZ_FULL,
-	},
-};
-
-static struct mtd_partition * __init nand_partitions(int size, int *num_partitions)
-{
-	*num_partitions = ARRAY_SIZE(ataman_nand_partition);
-	return ataman_nand_partition;
-}
-
-static struct atmel_nand_data __initdata ataman_nand_data = {
-	.ale		= 22,
-	.cle		= 21,
-	.det_pin	= AT91_PIN_PB1,
-	.rdy_pin	= AT91_PIN_PC2,
-	// .enable_pin	= ... not there
-	.partition_info	= nand_partitions,
-};
-
 #define ATAMAN_FLASH_BASE	AT91_CHIPSELECT_0
 #define ATAMAN_FLASH_SIZE	SZ_8M
 static struct mtd_partition ataman_part[] = {
-	{	.name = "uboot",
-	.size = 0x30000,//196KiB
-	.offset = 0,
+	{
+		.name = "uboot",
+		.size = 0x30000,//196KiB
+		.offset = 0,
 	},
 	{
 		.name = "uImage",
@@ -190,16 +165,7 @@ static struct platform_device ataman_flash = {
 	.resource	= &ataman_flash_resource,
 	.num_resources	= 1,
 };
-/*
-static struct gpio_led atamand_leds[] = {
-	{
-		.name			= "led0",
-		.gpio			= AT91_PIN_PB2,
-		.active_low		= 1,
-		.default_trigger	= "heartbeat",
-	}
-};
-*/
+
 static struct gpio_led ataman_leds[] = {
 	{
 		.name			= "led8",
@@ -238,28 +204,26 @@ static void __init ataman_board_init(void)
 	/* Serial */
 	at91_add_device_serial();
 	/* Ethernet */
-	//at91_add_device_eth(&dk_eth_data);
+	at91_add_device_eth(&ataman_eth_data);
 	/* USB Host */
-	at91_add_device_usbh(&dk_usbh_data);
+	at91_add_device_usbh(&ataman_usbh_data);
 	/* USB Device */
-	//at91_add_device_udc(&dk_udc_data);
-	//at91_set_multi_drive(ataman_udc_data.pullup_pin, 1);	/* pullup_pin is connected to reset */
+	at91_add_device_udc(&ataman_udc_data);
+	at91_set_multi_drive(ataman_udc_data.pullup_pin, 1);	/* pullup_pin is connected to reset */
 	/* Compact Flash */
 	at91_add_device_cf(&ataman_cf_data);
 	/* I2C */
 	at91_add_device_i2c(ataman_i2c_devices, ARRAY_SIZE(ataman_i2c_devices));
 	/* SPI */
-//	at91_add_device_spi(ataman_spi_devices, ARRAY_SIZE(ataman_spi_devices));
+	at91_add_device_spi(ataman_spi_devices, ARRAY_SIZE(ataman_spi_devices));
 	/* DataFlash card */
 //	at91_set_gpio_output(AT91_PIN_PB7, 0);
 
 	/* MMC */
 //	at91_set_gpio_output(AT91_PIN_PB7, 1);	/* this MMC card slot can optionally use SPI signaling (CS3). */
-	at91_add_device_mmc(0, &ataman_mmc_data);
+//	at91_add_device_mmc(0, &ataman_mmc_data);
 
-	/* NAND */
-//	at91_add_device_nand(&ataman_nand_data);
-	/* NOR Flash */
+	/* Parallel Flash */
 	platform_device_register(&ataman_flash);
 	/* LEDs */
 	at91_gpio_leds(ataman_leds, ARRAY_SIZE(ataman_leds));
