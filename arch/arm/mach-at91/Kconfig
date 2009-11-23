@@ -75,6 +75,12 @@ config MACH_ATAMAN
 	help
 	  Select this if you are using FlexLAB Ataman Development board.
 
+config MACH_FLCPU
+	bool "FlexLAB CPU board"
+	depends on ARCH_AT91RM9200
+	help
+	  Select this if you are using FlexLAB CPU board.
+
 config ARCH_AT91RM9200DK
 	bool "Atmel AT91RM9200-DK Development board"
 	depends on ARCH_AT91RM9200
