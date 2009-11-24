@@ -62,7 +62,7 @@ static void __init ataman_init_irq(void)
 
 static struct at91_eth_data __initdata ataman_eth_data = {
 	.phy_irq_pin	= 0,
-	.is_rmii	= 1,
+	.is_rmii	= 0,
 };
 static struct at91_usbh_data __initdata ataman_usbh_data = {
 	.ports		= 1,
