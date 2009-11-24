@@ -114,7 +114,7 @@ static struct spi_board_info ataman_spi_devices[] = {
 
 static struct i2c_board_info __initdata ataman_i2c_devices[] = {
 	{
-		I2C_BOARD_INFO("rtc-ds1672", 0x68),
+		I2C_BOARD_INFO("ds1672", 0x68),
 	},
 };
 
