@@ -155,6 +155,13 @@ static struct gpio_led ataman_leds[] = {
 
 
 };
+static struct i2c_board_info __initdata flcpu_i2c_devices[] = {
+	{
+		I2C_BOARD_INFO("ds1672", 0x68),
+	},
+};
+
+
 static void __init ataman_board_init(void)
 {
 	/* Serial */
@@ -167,7 +174,7 @@ static void __init ataman_board_init(void)
 	at91_add_device_udc(&ataman_udc_data);
 	at91_set_multi_drive(ataman_udc_data.pullup_pin, 1);	/* pullup_pin is connected to reset */
 	/* I2C */
-	//at91_add_device_i2c(ataman_i2c_devices, ARRAY_SIZE(ataman_i2c_devices));
+	at91_add_device_i2c(flcpu_i2c_devices, ARRAY_SIZE(flcpu_i2c_devices));
 	/* SPI */
 	//at91_add_device_spi(ataman_spi_devices, ARRAY_SIZE(ataman_spi_devices));
 	/* DataFlash card */
