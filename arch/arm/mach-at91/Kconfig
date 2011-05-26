@@ -81,6 +81,18 @@ config MACH_FLCPU
 	help
 	  Select this if you are using FlexLAB CPU board.
 
+config MACH_PSK
+	bool "Radio Complex PSK Board (c) FlexLab"
+	depends on ARCH_AT91RM9200
+	help
+	  Select this if you are using Radiocomplex PSK Board (c) FlexLab.
+
+config MACH_KURS
+	bool "Radio Complex KURS Board (c) FlexLab"
+	depends on ARCH_AT91RM9200
+	help
+	  Select this if you are using Radiocomplex KURS Board (c) FlexLab.
+
 config ARCH_AT91RM9200DK
 	bool "Atmel AT91RM9200-DK Development board"
 	depends on ARCH_AT91RM9200

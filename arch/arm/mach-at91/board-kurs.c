@@ -1,4 +1,7 @@
 /*
+ * (c) Copyright 2011 FlexLab Ltd.
+ * (c) Copyright 2011 Radio Complex Ltd.
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,10 +40,10 @@
 #include "generic.h"
 
 
-static void __init ataman_map_io(void)
+static void __init kurs_map_io(void)
 {
 	/* Initialize processor: 18.432 MHz crystal */
-	at91rm9200_initialize(18432000, AT91RM9200_BGA);
+	at91rm9200_initialize(18432000, AT91RM9200_PQFP);
 
 	/* DBGU on ttyS0. (Rx & Tx only) */
 	at91_register_uart(0, 0, 0);
@@ -55,34 +58,33 @@ static void __init ataman_map_io(void)
 	at91_set_serial_console(0);
 }
 
-static void __init ataman_init_irq(void)
+static void __init kurs_init_irq(void)
 {
 	at91rm9200_init_interrupts(NULL);
 }
 
-static struct at91_eth_data __initdata ataman_eth_data = {
+static struct at91_eth_data __initdata kurs_eth_data = {
 	.phy_irq_pin	= 0,
 	.is_rmii	= 0,
 };
-static struct at91_usbh_data __initdata ataman_usbh_data = {
+static struct at91_usbh_data __initdata kurs_usbh_data = {
 	.ports		= 1,
 };
 
-static struct at91_udc_data __initdata ataman_udc_data = {
+static struct at91_udc_data __initdata kurs_udc_data = {
 	.vbus_pin	= 0,
 	.pullup_pin	= 0,
 };
 
-static struct at91_mmc_data __initdata ataman_mmc_data = {
+static struct at91_mmc_data __initdata kurs_mmc_data = {
 	.slot_b		= 0,
 	.wire4		= 1,
-	.wp_pin         = 0,
 	.det_pin	=  AT91_PIN_PB23,
 };
 
-#define ATAMAN_FLASH_BASE	AT91_CHIPSELECT_0
-#define ATAMAN_FLASH_SIZE	SZ_8M
-static struct mtd_partition ataman_part[] = {
+#define KURS_FLASH_BASE	AT91_CHIPSELECT_0
+#define KURS_FLASH_SIZE	SZ_8M
+static struct mtd_partition kurs_part[] = {
 	{
 		.name = "uboot",
 		.size = 0x30000,//196KiB
@@ -101,80 +103,54 @@ static struct mtd_partition ataman_part[] = {
 
 };
 
-static void ataman_flash_set_vpp(struct map_info* mi,int i)
+static void kurs_flash_set_vpp(struct map_info* mi,int i)
 {
 }
-static struct physmap_flash_data ataman_flash_data = {
-	.parts = ataman_part,
+
+static struct physmap_flash_data kurs_flash_data = {
+	.parts = kurs_part,
 	.width = 2, 
 	.nr_parts = 3,
-	.set_vpp = ataman_flash_set_vpp,
+	.set_vpp = kurs_flash_set_vpp,
 };
 
-static struct resource ataman_flash_resource = {
-	.start		= ATAMAN_FLASH_BASE,
-	.end		= ATAMAN_FLASH_BASE + ATAMAN_FLASH_SIZE - 1,
+static struct resource kurs_flash_resource = {
+	.start		= KURS_FLASH_BASE,
+	.end		= KURS_FLASH_BASE + KURS_FLASH_SIZE - 1,
 	.flags		= IORESOURCE_MEM,
 };
 
-static struct platform_device ataman_flash = {
+static struct platform_device kurs_flash = {
 	.name		= "physmap-flash",
 	.id		= 0,
 	.dev		= {
-				.platform_data	= &ataman_flash_data,
+				.platform_data	= &kurs_flash_data,
 			},
-	.resource	= &ataman_flash_resource,
+	.resource	= &kurs_flash_resource,
 	.num_resources	= 1,
 };
 
-static struct gpio_led ataman_leds[] = {
-	{
-		.name			= "D2",
-		.gpio			= AT91_PIN_PC10,
-		.active_low		= 0,
-		.default_trigger	= "none",
-	},
-	{
-		.name			= "D3",
-		.gpio			= AT91_PIN_PC11,
-		.active_low		= 0,
-		.default_trigger	= "none",
-	},
-	{
-		.name			= "D4",
-		.gpio			= AT91_PIN_PC12,
-		.active_low		= 0,
-		.default_trigger	= "none",
-	},
-		{
-		.name			= "D5",
-		.gpio			= AT91_PIN_PC13,
-		.active_low		= 0,
-		.default_trigger	= "none",
-	}
 
-
-};
-static struct i2c_board_info __initdata flcpu_i2c_devices[] = {
+static struct i2c_board_info __initdata kurs_i2c_devices[] = {
 	{
 		I2C_BOARD_INFO("ds1672", 0x68),
 	},
 };
 
 
-static void __init ataman_board_init(void)
+static void __init kurs_board_init(void)
 {
 	/* Serial */
 	at91_add_device_serial();
 	/* Ethernet */
-	at91_add_device_eth(&ataman_eth_data);
+	at91_add_device_eth(&kurs_eth_data);
 	/* USB Host */
-	at91_add_device_usbh(&ataman_usbh_data);
+	at91_add_device_usbh(&kurs_usbh_data);
 	/* USB Device */
-	at91_add_device_udc(&ataman_udc_data);
-	at91_set_multi_drive(ataman_udc_data.pullup_pin, 1);	/* pullup_pin is connected to reset */
+	at91_add_device_udc(&kurs_udc_data);
+	at91_set_multi_drive(kurs_udc_data.pullup_pin, 1);	/* pullup_pin is connected to reset */
 	/* I2C */
-	at91_add_device_i2c(flcpu_i2c_devices, ARRAY_SIZE(flcpu_i2c_devices));
+	at91_add_device_i2c(kurs_i2c_devices, ARRAY_SIZE(kurs_i2c_devices));
 	/* SPI */
 	//at91_add_device_spi(ataman_spi_devices, ARRAY_SIZE(ataman_spi_devices));
 	/* DataFlash card */
@@ -182,23 +158,23 @@ static void __init ataman_board_init(void)
 
 	/* MMC */
 //	at91_set_gpio_output(AT91_PIN_PB7, 1);	/* this MMC card slot can optionally use SPI signaling (CS3). */
-	at91_add_device_mmc(0, &ataman_mmc_data);
+	at91_add_device_mmc(0, &kurs_mmc_data);
 
 	/* Parallel Flash */
-	platform_device_register(&ataman_flash);
+	platform_device_register(&kurs_flash);
 	/* LEDs */
-	at91_gpio_leds(ataman_leds, ARRAY_SIZE(ataman_leds));
+//	at91_gpio_leds(psk_leds, ARRAY_SIZE(psk_leds));
 	/* VGA */
 //	ataman_add_device_video();
 }
 
-MACHINE_START(FLCPU, "FlexLAB CPUBoard")
-	/* Maintainer: SAN People/Atmel */
+MACHINE_START(KURS, "Radio Complex KURS Board (c) FlexLab")
+	/* Maintainer: Wagan Sarukhanov/FlexLab */
 	.phys_io	= AT91_BASE_SYS,
 	.io_pg_offst	= (AT91_VA_BASE_SYS >> 18) & 0xfffc,
 	.boot_params	= AT91_SDRAM_BASE + 0x100,
 	.timer		= &at91rm9200_timer,
-	.map_io		= ataman_map_io,
-	.init_irq	= ataman_init_irq,
-	.init_machine	= ataman_board_init,
+	.map_io		= kurs_map_io,
+	.init_irq	= kurs_init_irq,
+	.init_machine	= kurs_board_init,
 MACHINE_END
