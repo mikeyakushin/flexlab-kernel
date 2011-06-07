@@ -61,7 +61,6 @@ static void max7315_led_work(struct work_struct *work)
 	u8 ls;
 	int i,r,t,s,t1,t2;
 	led = container_of(work, struct max7315_led, work);
-	printk("seting led %i to level %i\n",led->led_num,led->brightness);
 	if(led->led_num >8)
 	{
 		printk("led->led_num > 8(%i)\n",led->led_num);
@@ -178,7 +177,7 @@ static int __devinit max7315_probe(struct i2c_client *client,
 		if (pdata) {
 			if (pdata->leds[i].name)
 				snprintf(led[i].name,
-					 sizeof(led[i].name), "max7315:%s",
+					 sizeof(led[i].name), "%s",
 					 pdata->leds[i].name);
 			if (pdata->leds[i].default_trigger)
 				led[i].led_cdev.default_trigger =
