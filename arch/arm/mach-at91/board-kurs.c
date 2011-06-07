@@ -129,11 +129,59 @@ static struct platform_device kurs_flash = {
 	.resource	= &kurs_flash_resource,
 	.num_resources	= 1,
 };
-
-
+static struct led_info kurs_leds[] = {
+	{ 
+		.name = "gsm",
+		.default_trigger = "default-on",
+		.flags= 0,
+	},
+	{ 
+		.name = "gnss",
+		.default_trigger = "default-on",
+		.flags= 0,
+	},
+	{ 
+		.name = "ofab",
+		.default_trigger = "default-on",
+		.flags= 0,
+	}, 
+	{
+		.name = "busy",
+		.default_trigger = "default-on",
+		.flags= 0,
+	},
+	{
+		.name = "come",
+		.default_trigger = "default-on",
+		.flags= 0,
+	},
+	{
+		.name = "alarm",
+		.default_trigger = "default-on",
+		.flags= 0,
+	},
+	{
+		.name = "stw",
+		.default_trigger = "default-on",
+		.flags= 0,
+	},
+	{ 
+		.name = "free",
+		.default_trigger = "default-on",
+		.flags= 0,
+	},
+};
+static struct led_platform_data kurs_led_pdata = {
+	.num_leds=8,
+	.leds=kurs_leds
+};
 static struct i2c_board_info __initdata kurs_i2c_devices[] = {
 	{
 		I2C_BOARD_INFO("ds1672", 0x68),
+	},
+	{
+		I2C_BOARD_INFO("max7315", 0x20),
+		.platform_data=&kurs_led_pdata,
 	},
 };
 
@@ -158,7 +206,7 @@ static void __init kurs_board_init(void)
 
 	/* MMC */
 //	at91_set_gpio_output(AT91_PIN_PB7, 1);	/* this MMC card slot can optionally use SPI signaling (CS3). */
-	at91_add_device_mmc(0, &kurs_mmc_data);
+//	at91_add_device_mmc(0, &kurs_mmc_data);
 
 	/* Parallel Flash */
 	platform_device_register(&kurs_flash);
