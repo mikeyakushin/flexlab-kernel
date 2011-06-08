@@ -233,6 +233,12 @@ config ISL29003
 	  This driver can also be built as a module.  If so, the module
 	  will be called isl29003.
 
+config MAX7315_KEYS
+	tristate "Keypad for KURS board support"
+	depends on I2C
+	help
+		This KURS keypad driver. It send key press event throught special misc device.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 
