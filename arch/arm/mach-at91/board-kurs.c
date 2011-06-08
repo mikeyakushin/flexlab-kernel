@@ -183,6 +183,9 @@ static struct i2c_board_info __initdata kurs_i2c_devices[] = {
 		I2C_BOARD_INFO("max7315", 0x20),
 		.platform_data=&kurs_led_pdata,
 	},
+	{
+		I2C_BOARD_INFO("max7315k",0x21),
+	},
 };
 
 
